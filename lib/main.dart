@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:kibimoney/db/database_utils.dart';
-import 'package:kibimoney/pages/home_page.dart';
 import 'package:kibimoney/pages/test_page.dart';
 
 void main() async {

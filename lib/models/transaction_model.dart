@@ -39,4 +39,61 @@ class TransactionModel {
       await TagJoinModel.save(this, tag);
     }
   }
+
+  static Future<TransactionModel?> getById(int id) async {
+
+    List<TransactionModel> options = await _get(true, 'id = ?',[id]);
+    if (options.isNotEmpty) {
+      return options.first;
+    } else {
+      return null;
+    }
+  }
+
+  static Future<List> get([String? where, List<Object?>? whereArgs]) async {
+    return _get(false,where,whereArgs);
+  }
+
+  static Future<List<TransactionModel>> _get(bool first, [String? where, List<Object?>? whereArgs]) async {
+
+    List<Map<String, Object?>> items = await DatabaseUtils.database.query(tableName,where: where, whereArgs: whereArgs);
+
+    if (first) {
+      items = [items.first];
+    }
+
+    List<TransactionModel> out = [];
+
+    for (Map<String, Object?> map in items) {
+
+      int id = map['id'] as int;
+      DateTime date = DateTime.parse(map['date'] as String);
+      double amount = map['amount'] as double;
+      String transactionType = map['transactionType'] as String;
+      String name = map['name'] as String;
+      List<TagModel> tags = [];
+
+      List<Map<String, Object?>> joinTags = await DatabaseUtils.database.query(TagJoinModel.tableName, where: "transactionId = ?", whereArgs: [id]);
+      
+      for (Map<String, Object?> tagMap in joinTags) {
+        TagModel? tag = await TagModel.getById(tagMap['tagId'] as int);
+        if (tag != null) {
+          tags.add(tag);
+        }
+        
+      }
+
+      TransactionModel model = TransactionModel(date, amount, transactionType, name, tags);
+      model.id = id;
+      out.add(model);
+    }
+
+    return out;
+
+  }
+
+  @override
+  String toString() {
+    return "$tableName($id, $date, $amount, $name, ${tags.join(",")})";
+  }
 }
