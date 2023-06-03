@@ -11,12 +11,12 @@ class TransactionModel {
   static const String createTable =
       "CREATE TABLE IF NOT EXISTS $tableName(id INTEGER PRIMARY KEY, date TEXT, amount REAL, transactionType TEXT, name TEXT)";
 
-  late final int id;
-  final DateTime date;
-  final double amount;
-  final String transactionType;
-  final String name;
-  final List<TagModel> tags;
+  late int id;
+  DateTime date;
+  double amount;
+  String transactionType;
+  String name;
+  List<TagModel> tags;
 
   TransactionModel(
       this.date, this.amount, this.transactionType, this.name, this.tags);
@@ -38,6 +38,11 @@ class TransactionModel {
     for (TagModel tag in tags) {
       await TagJoinModel.save(this, tag);
     }
+  }
+
+  Future<void> delete() async {
+    await DatabaseUtils.database.delete(TagJoinModel.tableName,where: "tagId = ?", whereArgs: [id]);
+    await DatabaseUtils.database.delete(tableName,where: "id = ?", whereArgs: [id]);
   }
 
   static Future<TransactionModel?> getById(int id) async {

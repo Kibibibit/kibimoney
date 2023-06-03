@@ -21,7 +21,7 @@ class TagJoinModel {
   TagJoinModel(this.transactionId, this.tagId);
 
   static Future<void> save(TransactionModel transaction, TagModel tag) async {
-    TagJoinModel model = TagJoinModel(transaction.id, tag.id);
+    TagJoinModel model = TagJoinModel(transaction.id, tag.id!);
 
     await DatabaseUtils.database.insert(
         tableName,

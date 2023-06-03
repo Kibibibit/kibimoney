@@ -2,19 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:kibimoney/db/database_utils.dart';
 import 'package:kibimoney/models/tag_model.dart';
 import 'package:kibimoney/models/transaction_model.dart';
+import 'package:kibimoney/pages/abstract_page.dart';
+import 'package:kibimoney/widgets/app_scaffold.dart';
 
-class TestPage extends StatefulWidget {
+class TestPage extends StatefulWidget implements AbstractPage {
   const TestPage({super.key});
 
   @override
   State<TestPage> createState() => _TestPageState();
+  
+  @override
+  IconData get icon => Icons.bug_report;
+  
+  @override
+  String get title => "Test Page";
 }
 
 class _TestPageState extends State<TestPage> {
   late TextEditingController _controller;
 
   Future<void> onSave() async {
-    TagModel tag = TagModel(_controller.text);
+    TagModel tag = TagModel(_controller.text, Colors.red);
 
     await tag.save();
 
@@ -40,10 +48,9 @@ class _TestPageState extends State<TestPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Test Page"),
-      ),
+    return AppScaffold(
+      title: widget.title,
+      icon: widget.icon,
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(

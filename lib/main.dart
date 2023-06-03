@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kibimoney/db/database_utils.dart';
-import 'package:kibimoney/pages/test_page.dart';
+import 'package:kibimoney/pages/home_page.dart';
 
 void main() async {
 
@@ -17,10 +17,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const TestPage(),
+      home: const HomePage()
     );
   }
 }
