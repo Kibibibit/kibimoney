@@ -38,6 +38,14 @@ class TagModel {
     }
   }
 
+  static Future<int> count() async {
+    return DatabaseUtils.countTable(tableName);
+  }
+
+  static Future<int> getNthId(int i) async {
+    return DatabaseUtils.getNthItemId(tableName,i);
+  }
+
   static Future<List<TagModel>> get(
       [String? where, List<Object?>? whereArgs]) async {
     return _get(false, where, whereArgs);

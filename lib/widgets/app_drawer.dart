@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:kibimoney/pages/abstract_page.dart';
 import 'package:kibimoney/pages/home_page.dart';
 import 'package:kibimoney/pages/tag_page.dart';
-import 'package:kibimoney/pages/test_page.dart';
 import 'package:kibimoney/pages/transaction_page.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -17,7 +16,6 @@ class AppDrawer extends StatelessWidget {
           _DrawerTile(page: HomePage()),
           _DrawerTile(page: TagPage()),
           _DrawerTile(page: TransactionPage()),
-          _DrawerTile(page: TestPage())
         ],
       ),
     );

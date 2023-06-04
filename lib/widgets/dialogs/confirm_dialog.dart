@@ -10,7 +10,10 @@ class ConfirmDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppDialog(
       title: const Text("Are you sure?"),
-      body: Text(bodyText),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(bodyText),
+      ),
       actions: [
         TextButton(onPressed: (){Navigator.of(context).pop(true);}, child: const Text("YES")),
         TextButton(onPressed: (){Navigator.of(context).pop(false);}, child: const Text("NO")),

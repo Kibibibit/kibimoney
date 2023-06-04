@@ -22,6 +22,7 @@ class TagPage extends StatefulWidget implements AbstractPage {
 
 class _TagPageState extends State<TagPage> {
   List<int> tagIds = [];
+  int tagCount = 0;
   bool loading = true;
 
   @override
@@ -31,9 +32,9 @@ class _TagPageState extends State<TagPage> {
   }
 
   Future<void> loadTags() async {
-    List<TagModel> tags = await TagModel.get();
+    int queryCount = await TagModel.count();
     setState(() {
-      tagIds = tags.map((tag) => tag.id!).toList();
+      tagCount = queryCount;
       loading = false;
     });
   }
@@ -41,6 +42,7 @@ class _TagPageState extends State<TagPage> {
   Future<void> editTag([TagModel? tag]) async {
     late String name;
     late Color color;
+    bool saved = false;
     await showDialog(
         context: context,
         builder: (context) => TagDialog(
@@ -48,9 +50,12 @@ class _TagPageState extends State<TagPage> {
               onSave: (String n, Color c) {
                 name = n;
                 color = c;
+                saved = true;
               },
             ));
-
+    if (!saved) {
+      return;
+    }
     setState(() {
       loading = true;
     });
@@ -87,14 +92,14 @@ class _TagPageState extends State<TagPage> {
       icon: widget.icon,
       actions: [
         IconButton(
-            onPressed: () => {editTag()}, icon: const Icon(Icons.new_label))
+            onPressed: () {editTag();}, icon: const Icon(Icons.new_label))
       ],
       body: loading
           ? LoadingSpinner.centered()
           : ListView.builder(
-              itemCount: tagIds.length,
+              itemCount: tagCount,
               itemBuilder: (context, index) => TagWidget(
-                tagId: tagIds[index],
+                tagId: TagModel.getNthId(index),
                 onTap: (tag) => editTag(tag),
                 onDelete: (tag) => deleteTag(tag),
               ),

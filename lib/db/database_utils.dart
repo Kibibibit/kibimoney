@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:kibimoney/db/shared_prefs.dart';
 import 'package:kibimoney/models/tag_join_model.dart';
 import 'package:kibimoney/models/tag_model.dart';
 import 'package:kibimoney/models/transaction_model.dart';
@@ -58,6 +59,38 @@ class DatabaseUtils {
 
     _onConfigure(database);
     _onCreate(database, Settings.dbSettings.dbVersion);
+  }
+
+
+  static Future<int> countTable(String tableName) async {
+    return Sqflite.firstIntValue(await database.rawQuery('SELECT COUNT(*) FROM $tableName')) ?? 0;
+  }
+
+  static Future<int> getNthItemId(String tableName, int i, [String? orderBy]) async {
+
+    String formatOrderBy = orderBy == null ? "" : " ORDER BY $orderBy";
+
+    return (await database.rawQuery("SELECT id FROM $tableName$formatOrderBy LIMIT 1 OFFSET $i")).first['id'] as int? ?? 0;
+  }
+
+  static Future<double> getTotal() async {
+
+    List<Map<String, Object?>> queryResult = await database.query(TransactionModel.tableName, columns: ['amount','transactionType']);
+
+    double total = 0.0;
+
+    for (Map<String,Object?> option in queryResult) {
+      if (option['transactionType'] != null && option['amount'] != null) {
+
+        int sign = option['transactionType'] == TransactionModel.typeCredit ? 1 : -1;
+        total +=  sign*(option['amount'] as double);
+
+      }
+    }
+
+    SharedPrefs.setTotal(total);
+    return total;
+
   }
 
 }

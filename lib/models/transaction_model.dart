@@ -11,7 +11,7 @@ class TransactionModel {
   static const String createTable =
       "CREATE TABLE IF NOT EXISTS $tableName(id INTEGER PRIMARY KEY, date TEXT, amount REAL, transactionType TEXT, name TEXT)";
 
-  late int id;
+  int? id;
   DateTime date;
   double amount;
   String transactionType;
@@ -22,7 +22,7 @@ class TransactionModel {
       this.date, this.amount, this.transactionType, this.name, this.tags);
 
   Future<void> save() async {
-    id = await DatabaseUtils.getNextId(tableName);
+    id ??= await DatabaseUtils.getNextId(tableName);
 
     await DatabaseUtils.database.insert(
         tableName,
@@ -38,11 +38,14 @@ class TransactionModel {
     for (TagModel tag in tags) {
       await TagJoinModel.save(this, tag);
     }
+
+    await DatabaseUtils.getTotal();
   }
 
   Future<void> delete() async {
     await DatabaseUtils.database.delete(TagJoinModel.tableName,where: "tagId = ?", whereArgs: [id]);
     await DatabaseUtils.database.delete(tableName,where: "id = ?", whereArgs: [id]);
+    await DatabaseUtils.getTotal();
   }
 
   static Future<TransactionModel?> getById(int id) async {
@@ -55,13 +58,22 @@ class TransactionModel {
     }
   }
 
-  static Future<List> get([String? where, List<Object?>? whereArgs]) async {
+
+  static Future<List<TransactionModel>> get([String? where, List<Object?>? whereArgs]) async {
     return _get(false,where,whereArgs);
+  }
+
+  static Future<int> count() async {
+    return DatabaseUtils.countTable(tableName);
+  }
+
+  static Future<int> getNthId(int i) async {
+    return DatabaseUtils.getNthItemId(tableName,i,"date DESC, id DESC");
   }
 
   static Future<List<TransactionModel>> _get(bool first, [String? where, List<Object?>? whereArgs]) async {
 
-    List<Map<String, Object?>> items = await DatabaseUtils.database.query(tableName,where: where, whereArgs: whereArgs);
+    List<Map<String, Object?>> items = await DatabaseUtils.database.query(tableName,where: where, whereArgs: whereArgs, orderBy: "date DESC, id DESC");
 
     if (first) {
       items = [items.first];
@@ -92,6 +104,9 @@ class TransactionModel {
       model.id = id;
       out.add(model);
     }
+
+    // out.sort((a,b)=>a.date.compareTo(b.date));
+    // out = out.reversed.toList();
 
     return out;
 

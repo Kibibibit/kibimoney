@@ -91,21 +91,24 @@ class _TagDialogState extends State<TagDialog> {
           Text(editMode ? "Edit ${widget.tag!.name}" : "Create new tag"),
         ],
       ),
-      body: Column(
-        children: [
-          TextField(
-            controller: controller,
-            onChanged: (value){
-              setState(() {
-                name = value;
-              });
-            },
-            decoration: const InputDecoration(label: Text("Tag Name")),
-          ),
-          slider(value: red, onChange: setRed, color: Colors.red),
-          slider(value: green, onChange: setGreen, color: Colors.green),
-          slider(value: blue, onChange: setBlue, color: Colors.blue),
-        ],
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: controller,
+              onChanged: (value){
+                setState(() {
+                  name = value;
+                });
+              },
+              decoration: const InputDecoration(label: Text("Tag Name")),
+            ),
+            slider(value: red, onChange: setRed, color: Colors.red),
+            slider(value: green, onChange: setGreen, color: Colors.green),
+            slider(value: blue, onChange: setBlue, color: Colors.blue),
+          ],
+        ),
       ),
       actions: [
         TextButton(

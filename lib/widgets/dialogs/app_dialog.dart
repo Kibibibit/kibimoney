@@ -21,10 +21,7 @@ class AppDialog<T> extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: DefaultTextStyle(style:  DialogTheme.of(context).titleTextStyle ?? theme.textTheme.titleLarge! , child: title ?? Container()),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: body ?? Container(),
-          ),
+          body??Container(),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(

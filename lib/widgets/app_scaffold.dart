@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kibimoney/utils/settings.dart';
+import 'package:kibimoney/utils/app_styles.dart';
 import 'package:kibimoney/widgets/app_drawer.dart';
 
 class AppScaffold extends StatelessWidget {
@@ -19,7 +19,7 @@ class AppScaffold extends StatelessWidget {
         title: Row(
           children: [
             Icon(icon),
-            Padding(padding: Settings.appSettings.titlePadding),
+            Padding(padding: AppStyles.paddings.titlePadding),
             Text(title),
           ],
         ),
