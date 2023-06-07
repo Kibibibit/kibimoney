@@ -11,10 +11,13 @@ import 'package:sqflite/sqflite.dart';
 class DatabaseUtils {
 
   static late final Database database;
+  static late int payTagId;
 
   static Future<void> _onConfigure(Database db) async {
     await db.execute("PRAGMA foreign_keys = ON");
+
   }
+
 
   static Future<void> _onCreate(Database db, int version) async {
     List<String> tables = [TransactionModel.createTable,TagModel.createTable,TagJoinModel.createTable];
@@ -33,6 +36,15 @@ class DatabaseUtils {
     String dbPath = join(dbsPath, Settings.dbSettings.dbName);
 
     database = await openDatabase(dbPath, onCreate: _onCreate, onConfigure: _onConfigure, version: Settings.dbSettings.dbVersion);
+     late TagModel payTag;
+    List<TagModel> payTags = await TagModel.get("name = ?",["Pay"]);
+    if (payTags.isEmpty) {
+      payTag = TagModel("Pay", Colors.green[700]!);
+      await payTag.save();
+    } else {
+      payTag = payTags.first;
+    }
+    payTagId = payTag.id!;
 
   }
 
@@ -69,8 +81,12 @@ class DatabaseUtils {
   static Future<int> getNthItemId(String tableName, int i, [String? orderBy]) async {
 
     String formatOrderBy = orderBy == null ? "" : " ORDER BY $orderBy";
-
-    return (await database.rawQuery("SELECT id FROM $tableName$formatOrderBy LIMIT 1 OFFSET $i")).first['id'] as int? ?? 0;
+    List<Map<String,Object?>> queryResult = await database.rawQuery("SELECT id FROM $tableName$formatOrderBy LIMIT 1 OFFSET $i");
+    if (queryResult.isNotEmpty) {
+      return queryResult.first['id'] as int;
+    } else {
+      return 0;
+    }
   }
 
   static Future<double> getTotal() async {
@@ -92,5 +108,6 @@ class DatabaseUtils {
     return total;
 
   }
+
 
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kibimoney/db/shared_prefs.dart';
+import 'package:kibimoney/models/transaction_model.dart';
 import 'package:kibimoney/pages/abstract_page.dart';
 import 'package:kibimoney/utils/formatters.dart';
 import 'package:kibimoney/widgets/app_scaffold.dart';
@@ -21,6 +22,7 @@ class HomePage extends StatefulWidget implements AbstractPage {
 class _HomePageState extends State<HomePage> {
 
   late double total;
+  late double fromLastPay;
   bool loading = true;
 
 
@@ -31,8 +33,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> getStats() async {
-    total = SharedPrefs.total;
+    
+    double lastPay = await TransactionModel.changeFromLastPay();
+
     setState(() {
+      total = SharedPrefs.total;
+      fromLastPay = lastPay;
       loading = false;
     });
   }
@@ -52,7 +58,11 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               children: [
                 Text("You currently have:", style: theme.textTheme.headlineSmall,),
-                loading ? LoadingSpinner.centered() : Text("\$${Formatters.formatMoney(total)}",style: theme.textTheme.headlineMedium,)
+                loading ? LoadingSpinner.centered() : Text("\$${Formatters.formatMoney(total)}",style: theme.textTheme.headlineMedium,),
+                const Padding(padding: EdgeInsets.all(8.0)),
+                Text("Change since last pay:", style: theme.textTheme.headlineSmall,),
+                loading ? LoadingSpinner.centered() : Text("\$${Formatters.formatMoney(fromLastPay)}",style: theme.textTheme.headlineMedium,)
+
               ],
             ),
           ),
