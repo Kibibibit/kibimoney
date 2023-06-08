@@ -1,11 +1,14 @@
 abstract class Formatters {
+
   static String formatMoney(double amount) {
-    int f = amount.floor();
-    int d = ((amount - f) * 100).round();
+    int s = amount.sign.round();
+    double a = amount.abs();
+    int f = a.floor();
+    int d = ((a - f) * 100).round();
 
-    String cent = d.toString().padLeft(2, "0");
+    String cent = d.abs().toString().padLeft(2, "0");
 
-    return "$f.$cent";
+    return "${f*s}.$cent";
   }
 
   static const List<String> _weekdays = [

@@ -97,10 +97,10 @@ class DatabaseUtils {
 
     for (Map<String,Object?> option in queryResult) {
       if (option['transactionType'] != null && option['amount'] != null) {
-
+        print("${option['amount']} ${option['transactionType']}");
         int sign = option['transactionType'] == TransactionModel.typeCredit ? 1 : -1;
+        print(sign*(option['amount'] as double));
         total +=  sign*(option['amount'] as double);
-
       }
     }
 
