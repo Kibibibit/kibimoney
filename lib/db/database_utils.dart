@@ -7,18 +7,22 @@ import 'package:kibimoney/models/transaction_model.dart';
 import 'package:kibimoney/utils/settings.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-
-class DatabaseUtils {
-
+/// Class that stores all database functions and the database itself.
+/// 
+/// It's abstract because all of its members are static.
+abstract class DatabaseUtils {
+  /// The actual database object. Not initialised until `loadDatabase()` is called and completed.
   static late final Database database;
+  /// The id for the `Pay` tag. This is set during `loadDatabase()`
   static late int payTagId;
 
+  /// Without this foreign keys don't work :/
   static Future<void> _onConfigure(Database db) async {
     await db.execute("PRAGMA foreign_keys = ON");
-
   }
 
-
+  /// Creates all the tables needed. Version could be used to have it do different things
+  /// with different db versions.
   static Future<void> _onCreate(Database db, int version) async {
     List<String> tables = [TransactionModel.createTable,TagModel.createTable,TagJoinModel.createTable];
 
@@ -27,8 +31,12 @@ class DatabaseUtils {
     }
   }
 
+  /// Loads an initilises the database. Make sure to call this before
+  /// doing any database related operations.
+  /// 
+  /// Currently called on the loading screen.
   static Future<void> loadDatabase() async {
-
+    /// Without this, there is a chance the db will try to boot before flutter is initilised, which can cause issues
     WidgetsFlutterBinding.ensureInitialized();
 
     String dbsPath = await getDatabasesPath();
@@ -36,7 +44,9 @@ class DatabaseUtils {
     String dbPath = join(dbsPath, Settings.dbSettings.dbName);
 
     database = await openDatabase(dbPath, onCreate: _onCreate, onConfigure: _onConfigure, version: Settings.dbSettings.dbVersion);
-     late TagModel payTag;
+
+    /// As we need Pay for "x since last pay" calculations, we create/find it here
+    late TagModel payTag;
     List<TagModel> payTags = await TagModel.get("name = ?",["Pay"]);
     if (payTags.isEmpty) {
       payTag = TagModel("Pay", Colors.green[700]!);
@@ -48,6 +58,7 @@ class DatabaseUtils {
 
   }
 
+  /// Gets the next valid primary key for a given table
   static Future<int> getNextId(String tableName) async {
     List<Map<String, Object?>> queryResult = await DatabaseUtils.database.query(tableName,columns: ['id']);
 
@@ -62,6 +73,7 @@ class DatabaseUtils {
     return newId;
   }
 
+  /// Wipes the database - deletes all tables, reconfigures and recreates the db.
   static Future<void> wipeData() async {
     List<String> tables = [TagJoinModel.tableName, TagModel.tableName, TransactionModel.tableName];
 
@@ -73,11 +85,12 @@ class DatabaseUtils {
     _onCreate(database, Settings.dbSettings.dbVersion);
   }
 
-
+  /// Gets the amount of rows in a table
   static Future<int> countTable(String tableName) async {
     return Sqflite.firstIntValue(await database.rawQuery('SELECT COUNT(*) FROM $tableName')) ?? 0;
   }
 
+  /// After sorting the rows by `orderBy`, returns the nth item of `tableName`. Useful for lazy loading.
   static Future<int> getNthItemId(String tableName, int i, [String? orderBy]) async {
 
     String formatOrderBy = orderBy == null ? "" : " ORDER BY $orderBy";
@@ -89,6 +102,9 @@ class DatabaseUtils {
     }
   }
 
+  /// Calculates the total amount of money, and caches it in shared preferences.
+  /// This could probably be optimised using a raw query
+  /// TODO: Look into optimising this
   static Future<double> getTotal() async {
 
     List<Map<String, Object?>> queryResult = await database.query(TransactionModel.tableName, columns: ['amount','transactionType']);
