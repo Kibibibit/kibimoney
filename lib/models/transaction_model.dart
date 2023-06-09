@@ -14,14 +14,19 @@ class TransactionModel {
       "CREATE TABLE IF NOT EXISTS $tableName(id INTEGER PRIMARY KEY, date TEXT, amount REAL, transactionType TEXT, name TEXT)";
 
   int? id;
-  DateTime date;
+  late DateTime date;
   double amount;
   String transactionType;
   String name;
   List<TagModel> tags;
 
   TransactionModel(
-      this.date, this.amount, this.transactionType, this.name, this.tags);
+      DateTime date, this.amount, this.transactionType, this.name, this.tags) {
+        // This helps mantain sorting by having the date be offset by the current time, so transactions created later on the same
+        // date are moved later on the transaction list.
+        DateTime now = DateTime.now();
+        this.date = DateTime(date.year, date.month, date.day, now.hour, now.minute, now.second, now.microsecond, now.microsecond);
+      }
 
   Future<void> save() async {
     id ??= await DatabaseUtils.getNextId(tableName);
@@ -144,6 +149,7 @@ class TransactionModel {
       List<TransactionModel> transactionsSinceLastPay = await TransactionModel.get("date > ?",[pay.date.toIso8601String()]);
       double sum = 0;
       for (TransactionModel model in transactionsSinceLastPay) {
+
         if (model.transactionType == TransactionModel.typeCredit) {
           sum += model.amount;
         } else {
