@@ -104,7 +104,7 @@ abstract class DatabaseUtils {
 
   /// Calculates the total amount of money, and caches it in shared preferences.
   /// This could probably be optimised using a raw query
-  /// TODO: Look into optimising this
+  /// TODO: Look into optimising this using SUM 'SELECT SUM(amount) FROM -----'
   static Future<double> getTotal() async {
 
     List<Map<String, Object?>> queryResult = await database.query(TransactionModel.tableName, columns: ['amount','transactionType']);

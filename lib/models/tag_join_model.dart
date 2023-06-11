@@ -4,6 +4,7 @@ import 'package:kibimoney/models/transaction_model.dart';
 import 'package:kibimoney/utils/string_builder.dart';
 import 'package:sqflite/sqflite.dart';
 
+// Model for the join table between tags and transactions
 class TagJoinModel {
   static const String tableName = "tag_transaction";
   static final String createTable = StringBuilder.build([

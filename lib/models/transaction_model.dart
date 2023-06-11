@@ -122,9 +122,6 @@ class TransactionModel {
       out.add(model);
     }
 
-    // out.sort((a,b)=>a.date.compareTo(b.date));
-    // out = out.reversed.toList();
-
     return out;
   }
 
