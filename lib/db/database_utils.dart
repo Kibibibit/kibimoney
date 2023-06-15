@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:kibimoney/db/shared_prefs.dart';
 import 'package:kibimoney/models/tag_join_model.dart';
@@ -5,6 +7,7 @@ import 'package:kibimoney/models/tag_model.dart';
 import 'package:kibimoney/models/transaction_model.dart';
 import 'package:kibimoney/utils/settings.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 /// Class that stores all database functions and the database itself.
@@ -44,7 +47,7 @@ abstract class DatabaseUtils {
     /// Without this, there is a chance the db will try to boot before flutter is initilised, which can cause issues
     WidgetsFlutterBinding.ensureInitialized();
 
-    String dbsPath = await getDatabasesPath();
+    String dbsPath = Platform.isAndroid ? await getDatabasesPath() : (await getLibraryDirectory()).path;
 
     String dbPath = join(dbsPath, Settings.dbSettings.dbName);
 
