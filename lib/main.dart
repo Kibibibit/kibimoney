@@ -3,6 +3,8 @@ import 'package:kibimoney/pages/loading_page.dart';
 
 void main() async {
 
+  
+
   runApp(const MyApp());
 }
 
