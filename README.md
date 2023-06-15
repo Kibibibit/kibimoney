@@ -1,16 +1,9 @@
 # kibimoney
 
-A new Flutter project.
+A little finance tracker app.
 
-## Getting Started
+## Getting started:
 
-This project is a starting point for a Flutter application.
+You will need to create a blank env file called `.env`
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+If you want to import data from google sheets, you can include `SHEET_ID` and `API_KEY` in this file. I will update this to include the expected google sheets format later.
