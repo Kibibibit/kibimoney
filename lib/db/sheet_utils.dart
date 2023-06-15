@@ -80,7 +80,7 @@ abstract class SheetUtils {
     List<List<dynamic>> values =
         (data['values'] as List<dynamic>).cast<List<dynamic>>();
     values = values.sublist(1);
-    int millis = 0;
+    int millis = 1;
     for (List<dynamic> transactionD in values) {
       List<String> transaction = transactionD.cast<String>();
       String dateString = transaction[0];
@@ -102,6 +102,7 @@ abstract class SheetUtils {
 
       List<int> dateInts =
           dateString.split("-").map((e) => int.parse(e)).toList();
+      
       DateTime date = DateTime(dateInts[0], dateInts[1], dateInts[2]);
       date = date.add(Duration(milliseconds: millis));
 
@@ -114,7 +115,7 @@ abstract class SheetUtils {
       List<TransactionModel> test = await TransactionModel.get(
           "name = ? AND amount = ? AND transactionType = ? AND date = ?",
           [name, amount, transactionType, date.toIso8601String()]);
-
+      
       if (test.isEmpty) {
         TransactionModel transactionModel =
             TransactionModel(date, amount, transactionType, name, tags);

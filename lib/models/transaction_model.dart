@@ -24,8 +24,11 @@ class TransactionModel {
       DateTime date, this.amount, this.transactionType, this.name, this.tags) {
         // This helps mantain sorting by having the date be offset by the current time, so transactions created later on the same
         // date are moved later on the transaction list.
-        DateTime now = DateTime.now();
-        this.date = DateTime(date.year, date.month, date.day, now.hour, now.minute, now.second, now.microsecond, now.microsecond);
+        this.date = DateTime(date.year, date.month, date.day,0,0,0,date.millisecond);
+        if (date.millisecond == 0) {
+          DateTime now = DateTime.now();
+          this.date = this.date.add(Duration(hours: now.hour, minutes: now.minute, seconds: now.second, milliseconds: now.millisecond, microseconds: now.microsecond));
+        }
       }
 
   Future<void> save() async {
@@ -125,6 +128,24 @@ class TransactionModel {
     return out;
   }
 
+  static Future<double> sumOf([String? where, List<String>? whereArgs]) async {
+
+    List<String> query = ["SELECT SUM(amount) FROM $tableName"];
+
+    if (where != null) {
+      query.add("WHERE $where");
+    }
+    query.add("ORDER BY date DESC, id DESC");
+
+
+    List<Map<String,Object?>> queryResult = await DatabaseUtils.database.rawQuery(StringBuilder.build(query),whereArgs);
+    if (queryResult.isEmpty) {
+      return 0.0;
+    }
+    return (queryResult.first['SUM(amount)'] ?? 0.0) as double;
+
+  }
+
   static Future<double> changeFromLastPay() async {
     List<Map<String,Object?>> queryResult = await DatabaseUtils.database.rawQuery(StringBuilder.build([
       "SELECT transactionId, tagId, date, id FROM ${TagJoinModel.tableName}",
@@ -143,17 +164,20 @@ class TransactionModel {
     if (pay == null) {
       return SharedPrefs.total;
     } else {
-      List<TransactionModel> transactionsSinceLastPay = await TransactionModel.get("date > ?",[pay.date.toIso8601String()]);
-      double sum = 0;
-      for (TransactionModel model in transactionsSinceLastPay) {
+      double creditsSince = await TransactionModel.sumOf("date > ? AND transactionType = ?", [pay.date.toIso8601String(), typeCredit]);
+      double debitsSince = await TransactionModel.sumOf("date > ? AND transactionType = ?", [pay.date.toIso8601String(), typeDebit]);
+      // List<TransactionModel> transactionsSinceLastPay = await TransactionModel.get("date > ?",[pay.date.toIso8601String()]);
+      // double sum = 0;
+      // for (TransactionModel model in transactionsSinceLastPay) {
 
-        if (model.transactionType == TransactionModel.typeCredit) {
-          sum += model.amount;
-        } else {
-          sum -= model.amount;
-        }
-      }
-      return sum;
+      //   if (model.transactionType == TransactionModel.typeCredit) {
+      //     sum += model.amount;
+      //   } else {
+      //     sum -= model.amount;
+      //   }
+      // }
+      // return sum;
+      return creditsSince-debitsSince;
     }
   }
 

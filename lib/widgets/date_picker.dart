@@ -10,7 +10,7 @@ class DatePicker extends StatelessWidget {
 
 
   Future<void> _onTap(BuildContext context) async {
-    DateTime? newDate = await showDatePicker(context: context, initialDate: date ?? DateTime.now(), firstDate: DateTime.fromMicrosecondsSinceEpoch(0), lastDate: DateTime.now());
+    DateTime? newDate = await showDatePicker(context: context, initialDate: date ?? DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day), firstDate: DateTime.fromMicrosecondsSinceEpoch(0), lastDate: DateTime.now());
     if (newDate != null) {
       onChange(newDate);
     }

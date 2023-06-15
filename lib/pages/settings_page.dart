@@ -25,7 +25,7 @@ class _SettingsPageState extends State<SettingsPage> {
         context: context,
         builder: (context) => const ConfirmDialog(
             bodyText:
-                "Are you sure you want to wipe your data? This cannot be undone"));
+                "Are you sure you want to wipe your data? This cannot be undone")) ?? false;
     if (delete) {
       if (context.mounted) {
         showDialog(

@@ -123,23 +123,14 @@ abstract class DatabaseUtils {
     }
   }
 
+
   /// Calculates the total amount of money, and caches it in shared preferences.
-  /// This could probably be optimised using a raw query
-  /// TODO: Look into optimising this using SUM 'SELECT SUM(amount) FROM -----'
   static Future<double> getTotal() async {
-    List<Map<String, Object?>> queryResult = await database.query(
-        TransactionModel.tableName,
-        columns: ['amount', 'transactionType']);
+    double credit = await TransactionModel.sumOf("transactionType = ?", [TransactionModel.typeCredit]);
+    double debit = await TransactionModel.sumOf("transactionType = ?", [TransactionModel.typeDebit]);
 
-    double total = 0.0;
+    double total = credit-debit;
 
-    for (Map<String, Object?> option in queryResult) {
-      if (option['transactionType'] != null && option['amount'] != null) {
-        int sign =
-            option['transactionType'] == TransactionModel.typeCredit ? 1 : -1;
-        total += sign * (option['amount'] as double);
-      }
-    }
 
     SharedPrefs.setTotal(total);
     return total;
