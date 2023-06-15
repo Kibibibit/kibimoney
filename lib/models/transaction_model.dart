@@ -166,17 +166,6 @@ class TransactionModel {
     } else {
       double creditsSince = await TransactionModel.sumOf("date > ? AND transactionType = ?", [pay.date.toIso8601String(), typeCredit]);
       double debitsSince = await TransactionModel.sumOf("date > ? AND transactionType = ?", [pay.date.toIso8601String(), typeDebit]);
-      // List<TransactionModel> transactionsSinceLastPay = await TransactionModel.get("date > ?",[pay.date.toIso8601String()]);
-      // double sum = 0;
-      // for (TransactionModel model in transactionsSinceLastPay) {
-
-      //   if (model.transactionType == TransactionModel.typeCredit) {
-      //     sum += model.amount;
-      //   } else {
-      //     sum -= model.amount;
-      //   }
-      // }
-      // return sum;
       return creditsSince-debitsSince;
     }
   }
