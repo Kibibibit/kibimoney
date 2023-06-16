@@ -146,6 +146,67 @@ class TransactionModel {
 
   }
 
+  static Future<double> _sumOfType(String transactionType,[String? where, List<String>? whereArgs]) async {
+    String whereString = "transactionType = ?";
+    List<String> whereArgsList = [transactionType];
+    if (where != null) {
+      whereString = "$whereString AND $where";
+      whereArgsList.addAll(whereArgs!);
+    }
+    return sumOf(whereString, whereArgsList);
+  }
+
+  static Future<double> sumOfCredit([String? where, List<String>? whereArgs]) async {
+    return _sumOfType(typeCredit, where, whereArgs);
+  }
+
+  static Future<double> sumOfDebit([String? where, List<String>? whereArgs]) async {
+    return _sumOfType(typeDebit, where, whereArgs);
+  }
+
+  static Future<double> changeSum([String? where, List<String>? whereArgs]) async {
+    double credits = await sumOfCredit(where, whereArgs);
+    double debits = await sumOfDebit(where, whereArgs);
+    return credits-debits;
+  }
+
+  static Future<double> _sumOfTagType(String transactionType, TagModel tag, [String? where, List<String>? whereArgs]) async {
+
+    String whereString = "WHERE transactionType = ? AND tagId = ?";
+    List<String> whereArgsList = [transactionType, tag.id.toString()];
+
+    if (where != null) {
+      whereString = "$whereString AND $where";
+      whereArgsList.addAll(whereArgs!);
+    }
+
+    List<Map<String,Object?>> queryResult = await DatabaseUtils.database.rawQuery(StringBuilder.build([
+      "SELECT SUM(amount) FROM $tableName",
+      "LEFT JOIN $tableName ON ${TagJoinModel.tableName}.transactionId = $tableName.id",
+      whereString,
+      "ORDER BY date DESC, id DESC"
+    ]));
+
+    if (queryResult.isEmpty) {
+      return 0.0;
+    }
+    return (queryResult.first['SUM(amount)'] ?? 0.0) as double;
+  }
+
+  static Future<double> sumOfTagCredit(TagModel tag, [String? where, List<String>? whereArgs]) async {
+    return _sumOfTagType(typeCredit, tag, where, whereArgs);
+  }
+
+  static Future<double> sumOfTagDedit(TagModel tag, [String? where, List<String>? whereArgs]) async {
+    return _sumOfTagType(typeCredit, tag, where, whereArgs);
+  }
+
+  static Future<double> changeOfTag(TagModel tag, [String? where, List<String>? whereArgs]) async {
+    double credits = await sumOfTagCredit(tag, where, whereArgs);
+    double debits = await sumOfTagDedit(tag, where, whereArgs);
+    return credits-debits;
+  }
+
   static Future<double> changeFromLastPay() async {
     List<Map<String,Object?>> queryResult = await DatabaseUtils.database.rawQuery(StringBuilder.build([
       "SELECT transactionId, tagId, date, id FROM ${TagJoinModel.tableName}",
@@ -164,9 +225,7 @@ class TransactionModel {
     if (pay == null) {
       return SharedPrefs.total;
     } else {
-      double creditsSince = await TransactionModel.sumOf("date > ? AND transactionType = ?", [pay.date.toIso8601String(), typeCredit]);
-      double debitsSince = await TransactionModel.sumOf("date > ? AND transactionType = ?", [pay.date.toIso8601String(), typeDebit]);
-      return creditsSince-debitsSince;
+      return await changeSum("date > ?",[pay.date.toIso8601String()]);
     }
   }
 

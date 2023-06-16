@@ -129,12 +129,7 @@ abstract class DatabaseUtils {
 
   /// Calculates the total amount of money, and caches it in shared preferences.
   static Future<double> getTotal() async {
-    double credit = await TransactionModel.sumOf("transactionType = ?", [TransactionModel.typeCredit]);
-    double debit = await TransactionModel.sumOf("transactionType = ?", [TransactionModel.typeDebit]);
-
-    double total = credit-debit;
-
-
+    double total = await TransactionModel.changeSum();
     SharedPrefs.setTotal(total);
     return total;
   }
