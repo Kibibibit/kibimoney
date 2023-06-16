@@ -37,18 +37,20 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> getLargestSpend() async {
     List<TagModel> tags = await TagModel.get();
-    DateTime monthAgo = DateTime.now().subtract(const Duration(days:30));
+    DateTime monthAgo = DateTime.now().subtract(const Duration(days: 30));
     Map<String, double> spends = {};
     for (TagModel tag in tags) {
-      setState(() {
-        sortedTag.add(tag);
-      });
-      double a =  await TransactionModel.sumOfTagDedit(tag, "date >= ?", [monthAgo.toIso8601String()]);
-      if (!spends.containsKey(tag.name)) {
-        spends[tag.name] = a;
-      } else {
-        spends[tag.name] =
-            spends[tag.name]! + a;
+      double a = await TransactionModel.sumOfTagDedit(
+          tag, "date >= ?", [monthAgo.toIso8601String()]);
+      if (a != 0) {
+        setState(() {
+          sortedTag.add(tag);
+        });
+        if (!spends.containsKey(tag.name)) {
+          spends[tag.name] = a;
+        } else {
+          spends[tag.name] = spends[tag.name]! + a;
+        }
       }
     }
 
@@ -69,8 +71,6 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
@@ -81,9 +81,7 @@ class _HomePageState extends State<HomePage> {
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
             Text(
               "You currently have:",
               style: theme.textTheme.headlineSmall,
@@ -109,21 +107,31 @@ class _HomePageState extends State<HomePage> {
             Text("Biggest expenses in last 30 days:",
                 style: theme.textTheme.headlineSmall),
             const Divider(),
-                sortedTag.isEmpty ? LoadingSpinner.centered() : Flexible(
-                  child: Scrollbar(
-                    child: ListView.builder(
-                      
-                      shrinkWrap: true,
-                      itemCount: sortedTag.length,
-                      itemBuilder: (context, index) => ListTile(
-                      dense: true,
-                        minVerticalPadding: 0,
-                        leading: Icon(Icons.label, color: sortedTag[index].color),
-                        title: Text(sortedTag[index].name, style: const TextStyle(fontSize: 18),),
-                        trailing: Text("\$${Formatters.formatMoney(spending[sortedTag[index].name] ?? 0)}",style: const TextStyle(fontSize: 18, fontWeight: FontWeight.normal),),
-                      )),
-                  ),
-                )
+            sortedTag.isEmpty
+                ? LoadingSpinner.centered()
+                : Flexible(
+                    child: Scrollbar(
+                      child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: sortedTag.length,
+                          itemBuilder: (context, index) => ListTile(
+                                dense: true,
+                                minVerticalPadding: 0,
+                                leading: Icon(Icons.label,
+                                    color: sortedTag[index].color),
+                                title: Text(
+                                  sortedTag[index].name,
+                                  style: const TextStyle(fontSize: 18),
+                                ),
+                                trailing: Text(
+                                  "\$${Formatters.formatMoney(spending[sortedTag[index].name] ?? 0)}",
+                                  style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.normal),
+                                ),
+                              )),
+                    ),
+                  )
           ]),
         ),
       ),
