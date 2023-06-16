@@ -180,12 +180,14 @@ class TransactionModel {
       whereArgsList.addAll(whereArgs!);
     }
 
-    List<Map<String,Object?>> queryResult = await DatabaseUtils.database.rawQuery(StringBuilder.build([
+    String query = StringBuilder.build([
       "SELECT SUM(amount) FROM $tableName",
-      "LEFT JOIN $tableName ON ${TagJoinModel.tableName}.transactionId = $tableName.id",
+      "LEFT JOIN ${TagJoinModel.tableName} ON ${TagJoinModel.tableName}.transactionId = $tableName.id",
       whereString,
       "ORDER BY date DESC, id DESC"
-    ]));
+    ]);
+
+    List<Map<String,Object?>> queryResult = await DatabaseUtils.database.rawQuery(query, whereArgsList);
 
     if (queryResult.isEmpty) {
       return 0.0;
@@ -198,7 +200,7 @@ class TransactionModel {
   }
 
   static Future<double> sumOfTagDedit(TagModel tag, [String? where, List<String>? whereArgs]) async {
-    return _sumOfTagType(typeCredit, tag, where, whereArgs);
+    return _sumOfTagType(typeDebit, tag, where, whereArgs);
   }
 
   static Future<double> changeOfTag(TagModel tag, [String? where, List<String>? whereArgs]) async {
