@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:kibimoney/db/database_utils.dart';
-import 'package:kibimoney/db/sheet_utils.dart';
 import 'package:kibimoney/pages/abstract_page.dart';
 import 'package:kibimoney/widgets/app_scaffold.dart';
 import 'package:kibimoney/widgets/dialogs/confirm_dialog.dart';
@@ -41,18 +40,6 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  Future<void> onImport() async {
-    showDialog(
-        context: context,
-        builder: (context) {
-          SheetUtils.getTags().then((value) => SheetUtils.getTransactions()
-              .then((value) => DatabaseUtils.getTotal()
-                  .then((value) => Navigator.of(context).pop())));
-          return Dialog(
-            child: LoadingSpinner.centered(),
-          );
-        });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,13 +53,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 onWipe();
               },
               child: const Text("Wipe data")),
-          SheetUtils.hasEnv
-              ? TextButton(
-                  onPressed: () {
-                    onImport();
-                  },
-                  child: const Text("Import data"))
-              : Container(),
+  
         ],
       ),
     );
