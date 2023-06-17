@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kibimoney/db/database_utils.dart';
 import 'package:kibimoney/db/shared_prefs.dart';
-import 'package:kibimoney/db/sheet_utils.dart';
 import 'package:kibimoney/pages/home_page.dart';
 import 'package:kibimoney/widgets/loading_spinner.dart';
 
@@ -10,7 +9,6 @@ class LoadingPage extends StatelessWidget {
 
 
   Future<void> _doLoad() async {
-    await SheetUtils.init();
     await DatabaseUtils.loadDatabase();
     await SharedPrefs.loadPrefs();
     await DatabaseUtils.getTotal();
