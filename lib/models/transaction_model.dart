@@ -82,7 +82,7 @@ class TransactionModel {
   }
 
   static Future<int> getNthId(int i) async {
-    return DatabaseUtils.getNthItemId(tableName, i, "date DESC, id DESC");
+    return DatabaseUtils.getNthItemId(tableName, i, orderBy: "date DESC, id DESC");
   }
 
   static Future<List<TransactionModel>> _get(bool first,
@@ -209,7 +209,7 @@ class TransactionModel {
     return credits-debits;
   }
 
-  static Future<double> changeFromLastPay() async {
+  static Future<TransactionModel?> lastPay() async {
     List<Map<String,Object?>> queryResult = await DatabaseUtils.database.rawQuery(StringBuilder.build([
       "SELECT transactionId, tagId, date, id FROM ${TagJoinModel.tableName}",
       "LEFT JOIN $tableName ON ${TagJoinModel.tableName}.transactionId = $tableName.id",
@@ -218,16 +218,72 @@ class TransactionModel {
       "LIMIT 1",
     ]));
 
-    TransactionModel? pay;
 
     if (queryResult.isNotEmpty) {
-      pay = await TransactionModel.getById(queryResult.first['id'] as int);
+      return await TransactionModel.getById(queryResult.first['id'] as int);
     }
+    return null;
+
+  }
+
+  static Future<double> changeFromLastPay() async {
+
+
+    TransactionModel? pay = await lastPay();
 
     if (pay == null) {
       return SharedPrefs.total;
     } else {
       return await changeSum("date > ?",[pay.date.toIso8601String()]);
+    }
+  }
+
+  static Future<int> countWithTag(TagModel? tag, {DateTime? from}) async {
+    if (tag == null) {
+      return DatabaseUtils.countTable(tableName);
+    }
+    String where = "WHERE ${TagJoinModel.tableName}.tagId = ?";
+    List<Object> whereArgs = [tag.id!];
+    if (from != null) {
+      where = "$where AND $tableName.date > ?";
+      whereArgs.add(from.toIso8601String());
+
+    }
+    String query = StringBuilder.build([
+      "SELECT COUNT(*) FROM $tableName",
+      "LEFT JOIN ${TagJoinModel.tableName} ON ${TagJoinModel.tableName}.transactionId = $tableName.id",
+      where,
+      "ORDER BY date DESC, id DESC"
+    ]);
+
+    return Sqflite.firstIntValue(await DatabaseUtils.database.rawQuery(query, whereArgs)) ?? 0;
+  }
+
+  static Future<int> getNthIdWithTag(TagModel? tag, int i, {DateTime? from}) async {
+    if (tag == null) {
+      return DatabaseUtils.getNthItemId(tableName, i, orderBy: "date DESC, id DESC");
+    }
+    String where = "WHERE tagId = ?";
+    List<Object> whereArgs = [tag.id!];
+    if (from != null) {
+      where = "$where AND date > ?";
+      whereArgs.add(from.toIso8601String());
+
+    }
+    String query = StringBuilder.build([
+      "SELECT $tableName.* FROM $tableName",
+      "LEFT JOIN ${TagJoinModel.tableName} ON ${TagJoinModel.tableName}.transactionId = $tableName.id",
+      where,
+      "ORDER BY date DESC, id DESC",
+      "LIMIT 1 OFFSET $i"
+    ]);
+
+    List<Map<String, Object?>> queryResult = await DatabaseUtils.database
+        .rawQuery(query, whereArgs);
+    if (queryResult.isNotEmpty) {
+      return queryResult.first['id'] as int;
+    } else {
+      return 0;
     }
   }
 

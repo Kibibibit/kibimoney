@@ -3,6 +3,7 @@ import 'package:kibimoney/db/shared_prefs.dart';
 import 'package:kibimoney/models/tag_model.dart';
 import 'package:kibimoney/models/transaction_model.dart';
 import 'package:kibimoney/pages/abstract_page.dart';
+import 'package:kibimoney/pages/transaction_page.dart';
 import 'package:kibimoney/utils/formatters.dart';
 import 'package:kibimoney/widgets/app_scaffold.dart';
 import 'package:kibimoney/widgets/loading_spinner.dart';
@@ -28,6 +29,7 @@ class _HomePageState extends State<HomePage> {
   TagModel? largestSpend;
   Map<String, double> spending = {};
   List<TagModel> sortedTag = [];
+  DateTime? lastPayDate;
 
   @override
   void initState() {
@@ -37,11 +39,21 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> getLargestSpend() async {
     List<TagModel> tags = await TagModel.get();
-    DateTime monthAgo = DateTime.now().subtract(const Duration(days: 30));
+    TransactionModel? lastPay = await TransactionModel.lastPay();
+    late DateTime payDate;
+    if (lastPay == null) {
+      payDate = DateTime.fromMicrosecondsSinceEpoch(0);
+    } else {
+      payDate = lastPay.date;
+      setState(() {
+        lastPayDate = lastPay.date;
+      });
+    }
+
     Map<String, double> spends = {};
     for (TagModel tag in tags) {
       double a = await TransactionModel.sumOfTagDedit(
-          tag, "date >= ?", [monthAgo.toIso8601String()]);
+          tag, "date > ?", [payDate.toIso8601String()]);
       if (a != 0) {
         setState(() {
           sortedTag.add(tag);
@@ -69,6 +81,11 @@ class _HomePageState extends State<HomePage> {
       fromLastPay = lastPay;
       loading = false;
     });
+  }
+
+  void onTap(TagModel tag) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => TransactionPage(canEdit: false, tag: tag, from: lastPayDate,)));
   }
 
   @override
@@ -104,7 +121,7 @@ class _HomePageState extends State<HomePage> {
                     style: theme.textTheme.headlineMedium,
                   ),
             const Padding(padding: EdgeInsets.all(8.0)),
-            Text("Biggest expenses in last 30 days:",
+            Text("Biggest expenses since last pay:",
                 style: theme.textTheme.headlineSmall),
             const Divider(),
             sortedTag.isEmpty
@@ -115,6 +132,7 @@ class _HomePageState extends State<HomePage> {
                           shrinkWrap: true,
                           itemCount: sortedTag.length,
                           itemBuilder: (context, index) => ListTile(
+                                onTap: () => onTap(sortedTag[index]),
                                 dense: true,
                                 minVerticalPadding: 0,
                                 leading: Icon(Icons.label,

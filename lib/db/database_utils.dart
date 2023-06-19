@@ -107,18 +107,32 @@ abstract class DatabaseUtils {
   }
 
   /// Gets the amount of rows in a table
-  static Future<int> countTable(String tableName) async {
+  static Future<int> countTable(String tableName, [String? where, List<String>? whereArgs]) async {
+
+    String query = 'SELECT COUNT(*) FROM $tableName';
+    if (where != null) {
+      query = "$query WHERE $where";
+    }
+
     return Sqflite.firstIntValue(
-            await database.rawQuery('SELECT COUNT(*) FROM $tableName')) ??
+            await database.rawQuery(query,whereArgs)) ??
         0;
   }
 
   /// After sorting the rows by `orderBy`, returns the nth item of `tableName`. Useful for lazy loading.
   static Future<int> getNthItemId(String tableName, int i,
-      [String? orderBy]) async {
-    String formatOrderBy = orderBy == null ? "" : " ORDER BY $orderBy";
+      {String? orderBy, String? where, List<String>? whereArgs}) async {
+    String query = "SELECT id FROM $tableName";
+    if (where != null) {
+      query = "$query WHERE $where";
+    }
+    if (orderBy != null) {
+      query = "$query ORDER BY $orderBy";
+    }
+    query = "$query LIMIT 1 OFFSET $i";
+
     List<Map<String, Object?>> queryResult = await database
-        .rawQuery("SELECT id FROM $tableName$formatOrderBy LIMIT 1 OFFSET $i");
+        .rawQuery(query, whereArgs);
     if (queryResult.isNotEmpty) {
       return queryResult.first['id'] as int;
     } else {

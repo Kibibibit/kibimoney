@@ -8,13 +8,13 @@ class TransactionWidget extends StatefulWidget {
   final Future<int> transactionId;
   final Widget? trailing;
   final void Function(TransactionModel)? onDelete;
-  final void Function(TransactionModel) onTap;
+  final void Function(TransactionModel)? onTap;
   const TransactionWidget(
       {super.key,
       required this.transactionId,
       this.trailing,
       this.onDelete,
-      required this.onTap});
+      this.onTap});
 
   @override
   State<TransactionWidget> createState() => _TransactionWidgetState();
@@ -105,8 +105,8 @@ class _TransactionWidgetState extends State<TransactionWidget> {
                       )
                     : null),
             onTap: () {
-              if (!loading && !error) {
-                widget.onTap(transactionModel);
+              if (!loading && !error && widget.onTap != null) {
+                widget.onTap!(transactionModel);
               }
             },
           );
