@@ -48,7 +48,7 @@ class _TagPageState extends State<TagPage> {
         builder: (context) => TagDialog(
               tag: tag,
               onSave: (String n, Color c) {
-                name = n;
+                name = n.trim();
                 color = c;
                 saved = true;
               },

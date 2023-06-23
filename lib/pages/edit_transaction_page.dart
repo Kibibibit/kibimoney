@@ -41,7 +41,7 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
       editMode = false;
       name = "";
       transactionType = TransactionModel.typeDebit;
-      date = DateTime.now();
+      date = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
       amount = 0;
       tags = [];
     }
@@ -92,7 +92,7 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
         tagModels.add(tagModel);
       }
     }
-    String newName = name;
+    String newName = name.trim();
     if (name.isEmpty) {
       newName = "New Transaction";
     }

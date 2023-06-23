@@ -39,7 +39,6 @@ class _TransactionPageState extends State<TransactionPage> {
 
   Future<void> loadTransactions() async {
     int count = await TransactionModel.countWithTag(widget.tag, from: widget.from);
-    print(count);
     if (widget.tag != null) {
       double m = await TransactionModel.sumOfTagDedit(widget.tag!, "date > ?", [widget.from!.toIso8601String()]);
       setState(() {
